@@ -58,13 +58,13 @@ jobs:
         run: |
           cd cangjie_compiler
           # Build binary packages only (no source package, unsigned)
-          dpkg-buildpackage -us -uc -b || true
+          dpkg-buildpackage -us -uc -b
           
           # Move generated files to a dedicated output directory
           cd ..
           mkdir -p build-output
           if ls *.deb *.buildinfo *.changes 2>/dev/null; then
-            mv *.deb *.buildinfo *.changes build-output/ || true
+            mv *.deb *.buildinfo *.changes build-output/
           fi
           
           # List generated files
