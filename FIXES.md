@@ -305,8 +305,8 @@ After trying multiple approaches to solve CMake build issues (including adjustin
 Use upstream's `build.py` script for building and installation:
 
 ```bash
-# Build
-python3 build.py build -t Release --no-tests -j $(nproc)
+# Build (注意：build type 使用小写 / Note: use lowercase for build type)
+python3 build.py build -t release --no-tests -j $(nproc)
 
 # Install
 python3 build.py install --prefix=/path/to/install
@@ -319,6 +319,29 @@ python3 build.py install --prefix=/path/to/install
 3. **避免问题** / Avoid Issues: 绕过所有 CMake 相关的配置问题
 4. **易于维护** / Easy Maintenance: 跟随上游的构建流程更新
 5. **减少补丁** / Fewer Patches: 不需要覆盖编译器标志或修改构建系统
+
+### 修复 / Fix for build.py Arguments
+
+**问题 / Issue:**
+初始使用了 `Release`（首字母大写）作为 build type，导致错误：
+Initially used `Release` (capitalized) as build type, causing error:
+```
+KeyError: 'Release'
+AttributeError: 'str' object has no attribute 'build_type'
+```
+
+**原因 / Cause:**
+build.py 中的 BuildType 枚举使用小写名称：
+BuildType enum in build.py uses lowercase names:
+- `debug` = "Debug"
+- `release` = "Release"
+- `relwithdebinfo` = "RelWithDebInfo"
+
+**修复 / Fix:**
+```diff
+- python3 build.py build -t Release --no-tests
++ python3 build.py build -t release --no-tests
+```
 
 ## 验证 / Verification
 
