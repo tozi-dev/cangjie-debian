@@ -1,0 +1,7 @@
+cangjie-compiler (0.53.18-1) unstable; urgency=medium
+
+  * Initial release of Cangjie compiler Debian packages
+  * Package cangjie-compiler: Contains the compiler binaries and tools
+  * Package cangjie-compiler-headers: Contains header files for development
+
+ -- Cangjie Team <cangjie@example.com>  Wed, 11 Feb 2026 08:48:30 +0000
