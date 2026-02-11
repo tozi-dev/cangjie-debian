@@ -274,7 +274,51 @@ Date:   2026-02-11
     - Upstream build system treats warnings as errors by default
     - Prevents build failure while keeping warnings visible
     - Allows packaging without modifying upstream code
+
+commit 71b7082XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+Author: GitHub Copilot
+Date:   2026-02-11
+
+    Switch to build.py approach for building and installation
+    
+    - Changed technical approach to use upstream build.py script
+    - Removed --buildsystem=cmake+ninja
+    - Uses `python3 build.py build -t Release --no-tests`
+    - Uses `python3 build.py install --prefix=...`
+    - Avoids all CMake configuration issues
+    - Follows official build method from cangjie_build repository
 ```
+
+## 技术方案变更 / Technical Approach Change
+
+### 问题背景 / Background
+
+在尝试多种方法解决 CMake 构建问题后（包括调整编译器标志、处理警告等），决定采用上游官方推荐的构建方法。
+
+After trying multiple approaches to solve CMake build issues (including adjusting compiler flags, handling warnings, etc.), decided to adopt the official upstream build method.
+
+### 新方案 / New Approach
+
+参考 https://github.com/cangjielanguage/cangjie_build
+
+使用上游的 `build.py` 脚本进行构建和安装：
+Use upstream's `build.py` script for building and installation:
+
+```bash
+# Build
+python3 build.py build -t Release --no-tests -j $(nproc)
+
+# Install
+python3 build.py install --prefix=/path/to/install
+```
+
+### 优势 / Advantages
+
+1. **官方支持** / Official Support: 使用上游推荐的构建方法
+2. **简化配置** / Simplified Configuration: 不需要手动配置 CMake 参数
+3. **避免问题** / Avoid Issues: 绕过所有 CMake 相关的配置问题
+4. **易于维护** / Easy Maintenance: 跟随上游的构建流程更新
+5. **减少补丁** / Fewer Patches: 不需要覆盖编译器标志或修改构建系统
 
 ## 验证 / Verification
 

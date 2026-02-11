@@ -15,6 +15,20 @@ Two packages are generated from this packaging:
 
 ## Building Packages
 
+### Build Method
+
+This packaging uses the upstream's official `build.py` script from the [cangjie_build](https://github.com/cangjielanguage/cangjie_build) project. The build process is:
+
+```bash
+python3 build.py build -t Release --no-tests
+python3 build.py install --prefix=/usr
+```
+
+This approach:
+- Uses the official build method recommended by upstream
+- Avoids CMake configuration complexities
+- Ensures compatibility with future upstream changes
+
 ### Prerequisites
 
 ```bash
