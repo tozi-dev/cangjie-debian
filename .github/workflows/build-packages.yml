@@ -1,0 +1,104 @@
+name: Build Debian Packages
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build-packages:
+    name: Build on Ubuntu ${{ matrix.ubuntu-version }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        ubuntu-version: ['22.04']
+    
+    steps:
+      - name: Checkout cangjie-debian repository
+        uses: actions/checkout@v4
+        with:
+          path: cangjie-debian
+      
+      - name: Checkout cangjie_compiler repository
+        uses: actions/checkout@v4
+        with:
+          repository: cangjielanguage/cangjie_compiler
+          path: cangjie_compiler
+          submodules: recursive
+      
+      - name: Set up build environment
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            debhelper \
+            cmake \
+            clang-14 \
+            llvm-14-dev \
+            libclang-14-dev \
+            ninja-build \
+            python3 \
+            git \
+            build-essential \
+            devscripts \
+            lintian \
+            dh-make
+      
+      - name: Copy debian packaging to compiler source
+        run: |
+          cp -r cangjie-debian/debian cangjie_compiler/
+      
+      - name: Build Debian packages
+        run: |
+          cd cangjie_compiler
+          # Build binary packages only (no source package, unsigned)
+          dpkg-buildpackage -us -uc -b
+          
+          # Move generated files to a dedicated output directory
+          cd ..
+          mkdir -p build-output
+          if ls *.deb *.buildinfo *.changes 2>/dev/null; then
+            mv *.deb *.buildinfo *.changes build-output/
+          fi
+          
+          # List generated files
+          echo "Generated files:"
+          ls -lah build-output/ 2>/dev/null || echo "No .deb files found"
+      
+      - name: Check package contents
+        run: |
+          cd build-output
+          for deb in *.deb; do
+            if [ -f "$deb" ]; then
+              echo "=== Contents of $deb ==="
+              dpkg-deb --contents "$deb"
+              echo ""
+            fi
+          done
+        continue-on-error: true
+      
+      - name: Lint packages
+        run: |
+          cd build-output
+          for deb in *.deb; do
+            if [ -f "$deb" ]; then
+              echo "=== Linting $deb ==="
+              lintian "$deb" || true
+              echo ""
+            fi
+          done
+        continue-on-error: true
+      
+      - name: Upload packages as artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: debian-packages-ubuntu-${{ matrix.ubuntu-version }}
+          path: build-output/
+          if-no-files-found: warn

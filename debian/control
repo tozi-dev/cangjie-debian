@@ -1,0 +1,41 @@
+Source: cangjie-compiler
+Section: devel
+Priority: optional
+Maintainer: Cangjie Team <cangjie@example.com>
+Build-Depends: debhelper-compat (= 13),
+               cmake (>= 3.16),
+               clang-14,
+               llvm-14-dev,
+               libclang-14-dev,
+               ninja-build,
+               python3,
+               git
+Standards-Version: 4.6.0
+Homepage: https://github.com/cangjielanguage/cangjie_compiler
+Vcs-Browser: https://github.com/tozi-dev/cangjie-debian
+Vcs-Git: https://github.com/tozi-dev/cangjie-debian.git
+
+Package: cangjie-compiler
+Architecture: amd64 arm64
+Depends: ${shlibs:Depends}, ${misc:Depends},
+         llvm-14,
+         libclang-cpp14t64
+Description: Cangjie programming language compiler
+ Cangjie is a general-purpose programming language designed for
+ full-scenario application development. It balances development
+ efficiency and runtime performance while providing a good
+ programming experience.
+ .
+ This package contains the Cangjie compiler (cjc) and related
+ command-line tools for compiling Cangjie source code.
+
+Package: cangjie-compiler-headers
+Architecture: all
+Depends: ${misc:Depends}
+Description: Cangjie programming language compiler header files
+ Cangjie is a general-purpose programming language designed for
+ full-scenario application development.
+ .
+ This package contains the C/C++ header files for the Cangjie
+ compiler, which are needed if you want to develop applications
+ that integrate with the Cangjie compiler infrastructure.

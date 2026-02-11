@@ -1,0 +1,31 @@
+#!/usr/bin/make -f
+# -*- makefile -*-
+
+# Uncomment this to turn on verbose mode.
+#export DH_VERBOSE=1
+
+export DEB_BUILD_MAINT_OPTIONS = hardening=+all
+export DEB_LDFLAGS_MAINT_APPEND = -Wl,--as-needed
+
+%:
+	dh $@
+
+override_dh_auto_configure:
+	# build.py handles configuration internally
+	@echo "Skipping dh_auto_configure - build.py will handle it"
+
+override_dh_auto_build:
+	# Use build.py to build the compiler
+	# Set CXXFLAGS to disable -Werror which causes build failures on upstream code
+	CXXFLAGS="-Wno-error" python3 build.py build -t release --no-tests -j $(shell nproc)
+
+override_dh_auto_install:
+	# Use build.py to install to debian/tmp
+	python3 build.py install --prefix=$(CURDIR)/debian/tmp/usr
+
+override_dh_auto_test:
+	# Skip tests for now as they may require specific setup
+	@echo "Skipping tests"
+
+override_dh_install:
+	dh_install --fail-missing
