@@ -16,7 +16,7 @@ override_dh_auto_configure:
 
 override_dh_auto_build:
 	# Use build.py to build the compiler
-	python3 build.py build -t Release --no-tests -j $(shell nproc)
+	python3 build.py build -t release --no-tests -j $(shell nproc)
 
 override_dh_auto_install:
 	# Use build.py to install to debian/tmp
