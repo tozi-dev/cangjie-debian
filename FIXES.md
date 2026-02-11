@@ -91,6 +91,37 @@ rm debian/compat
 
 这是 Debian 推荐的现代方法，因为它允许通过构建依赖明确声明兼容级别。
 
+### 4. 构建失败时工作流仍然成功 / Workflow Succeeds Despite Build Failure
+
+**错误信息 / Error Message:**
+```
+make[1]: *** [debian/rules:15: override_dh_auto_configure] Error 2
+make: *** [debian/rules:12: build] Error 2
+dpkg-buildpackage: error: debian/rules build subprocess returned exit status 2
+```
+但工作流仍然标记为成功 / But workflow still marked as success
+
+**原因 / Cause:**
+- 构建命令使用了 `|| true`，这会使命令总是返回成功状态
+- 即使 dpkg-buildpackage 失败，工作流也会继续并标记为成功
+- 这违反了 CI/CD 的基本原则：失败应该被检测到
+
+**修复 / Fix:**
+删除 `|| true`，让构建命令在失败时正确退出：
+```diff
+- dpkg-buildpackage -us -uc -b || true
++ dpkg-buildpackage -us -uc -b
+```
+
+同时删除 mv 命令的 `|| true`：
+```diff
+- mv *.deb *.buildinfo *.changes build-output/ || true
++ mv *.deb *.buildinfo *.changes build-output/
+```
+
+注意：后续步骤（检查包内容、linting、上传产物）使用 `continue-on-error: true` 和 `if: always()`，
+因此即使构建失败，这些步骤仍会运行以收集调试信息。
+
 ## 测试结果 / Test Results
 
 修复后的工作流将会：
@@ -99,10 +130,11 @@ After the fixes, the workflow will:
 1. ✅ 正确解析构建依赖 / Correctly resolve build dependencies
 2. ✅ 成功构建 Debian 软件包 / Successfully build Debian packages
 3. ✅ 正确上传构建产物 / Correctly upload build artifacts
+4. ✅ 构建失败时工作流也会失败 / Workflow fails when build fails
 
 ## 修改的文件 / Modified Files
 
-- `.github/workflows/build-packages.yml` - 修复产物路径和构建流程
+- `.github/workflows/build-packages.yml` - 修复产物路径和构建流程，移除 || true
 - `debian/control` - 更新依赖包名称为具体版本
 - `debian/compat` - 删除（使用 debhelper-compat 替代）
 
@@ -118,6 +150,16 @@ Date:   2026-02-11
     - Fix debian/control: Use specific LLVM 14 package names that match what's installed
     - Fix artifact upload: Use build-output/ directory instead of relative paths with ../
     - Update libclang-cpp14 to libclang-cpp14t64 to match Ubuntu 22.04 package name
+
+commit 74bc94922d9bd813961d16ee6251f673b9d44e62
+Author: GitHub Copilot  
+Date:   2026-02-11
+
+    Remove || true from build command to fail on errors
+    
+    - Removed || true from dpkg-buildpackage to ensure build failures cause workflow failure
+    - Removed || true from mv command for consistency
+    - Ensures proper CI/CD behavior: failures are detected and reported
 ```
 
 ## 验证 / Verification
