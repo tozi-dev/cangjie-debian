@@ -18,6 +18,7 @@ override_dh_auto_configure:
 		-DCANGJIE_BUILD_TESTS=OFF \
 		-DCANGJIE_BUILD_CJC=ON \
 		-DCANGJIE_VISIBLE_OPTIONS_ONLY=ON \
+		-DCMAKE_CXX_FLAGS="-Wno-error" \
 		-G Ninja
 
 override_dh_auto_build:
