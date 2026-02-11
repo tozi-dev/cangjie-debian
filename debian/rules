@@ -8,28 +8,23 @@ export DEB_BUILD_MAINT_OPTIONS = hardening=+all
 export DEB_LDFLAGS_MAINT_APPEND = -Wl,--as-needed
 
 %:
-	dh $@ --buildsystem=cmake+ninja
+	dh $@
 
 override_dh_auto_configure:
-	dh_auto_configure -- \
-		-DCMAKE_BUILD_TYPE=Release \
-		-DCMAKE_INSTALL_PREFIX=/usr \
-		-DLLVM_DIR=/usr/lib/llvm-14/cmake \
-		-DCANGJIE_BUILD_TESTS=OFF \
-		-DCANGJIE_BUILD_CJC=ON \
-		-DCANGJIE_VISIBLE_OPTIONS_ONLY=ON \
-		-DCMAKE_CXX_FLAGS="-Wno-error" \
-		-G Ninja
+	# build.py handles configuration internally
+	@echo "Skipping dh_auto_configure - build.py will handle it"
 
 override_dh_auto_build:
-	dh_auto_build
+	# Use build.py to build the compiler
+	python3 build.py build -t Release --no-tests -j $(shell nproc)
 
 override_dh_auto_install:
-	dh_auto_install --destdir=debian/tmp
+	# Use build.py to install to debian/tmp
+	python3 build.py install --prefix=$(CURDIR)/debian/tmp/usr
 
 override_dh_auto_test:
 	# Skip tests for now as they may require specific setup
-	echo "Skipping tests"
+	@echo "Skipping tests"
 
 override_dh_install:
 	dh_install --fail-missing
