@@ -122,6 +122,29 @@ dpkg-buildpackage: error: debian/rules build subprocess returned exit status 2
 注意：后续步骤（检查包内容、linting、上传产物）使用 `continue-on-error: true` 和 `if: always()`，
 因此即使构建失败，这些步骤仍会运行以收集调试信息。
 
+### 5. CMake/Ninja 构建系统不匹配 / CMake/Ninja Build System Mismatch
+
+**错误信息 / Error Message:**
+```
+make[2]: *** No targets specified and no makefile found.  Stop.
+dh_auto_build: error: cd obj-x86_64-linux-gnu && make -j4 returned exit code 2
+```
+
+**原因 / Cause:**
+- `debian/rules` 使用 `-G Ninja` 生成 Ninja 构建文件
+- 但 `--buildsystem=cmake` 默认使用 make 而不是 ninja
+- CMake 配置成功但生成的是 build.ninja 而非 Makefile
+- dh_auto_build 尝试运行 make 时找不到 Makefile
+
+**修复 / Fix:**
+将构建系统改为 `cmake+ninja` 以匹配 Ninja 生成器：
+```diff
+- dh $@ --buildsystem=cmake
++ dh $@ --buildsystem=cmake+ninja
+```
+
+这确保 dh_auto_build 会运行 `ninja` 而不是 `make`。
+
 ## 测试结果 / Test Results
 
 修复后的工作流将会：
@@ -137,6 +160,7 @@ After the fixes, the workflow will:
 - `.github/workflows/build-packages.yml` - 修复产物路径和构建流程，移除 || true
 - `debian/control` - 更新依赖包名称为具体版本
 - `debian/compat` - 删除（使用 debhelper-compat 替代）
+- `debian/rules` - 修复构建系统为 cmake+ninja
 
 ## 提交记录 / Commit
 
@@ -160,6 +184,16 @@ Date:   2026-02-11
     - Removed || true from dpkg-buildpackage to ensure build failures cause workflow failure
     - Removed || true from mv command for consistency
     - Ensures proper CI/CD behavior: failures are detected and reported
+
+commit 50c8d80XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+Author: GitHub Copilot
+Date:   2026-02-11
+
+    Fix build system mismatch: use cmake+ninja instead of cmake
+    
+    - Changed --buildsystem=cmake to --buildsystem=cmake+ninja
+    - Ensures dh_auto_build runs ninja instead of make
+    - Fixes "No targets specified and no makefile found" error
 ```
 
 ## 验证 / Verification
