@@ -343,6 +343,33 @@ BuildType enum in build.py uses lowercase names:
 + python3 build.py build -t release --no-tests
 ```
 
+### 修复 -Werror 编译错误 / Fix -Werror Compilation Error
+
+**问题 / Issue:**
+build.py 默认使用 `-Werror` 编译，导致上游代码的警告被当作错误：
+build.py compiles with `-Werror` by default, causing upstream warnings to be treated as errors:
+```
+error: 'switch' missing 'default' label [-Werror,-Wswitch-default]
+/home/runner/.../cangjie_compiler/include/cangjie/AST/Node.h:2256:9
+1 error generated.
+```
+
+**原因 / Cause:**
+- build.py 编译时启用 `-Werror -Wswitch-default` 等严格标志
+- 上游代码中有 switch 语句缺少 default 分支
+- 这些警告在 `-Werror` 下被当作错误导致编译失败
+
+**修复 / Fix:**
+在运行 build.py 前设置 `CXXFLAGS` 环境变量：
+Set `CXXFLAGS` environment variable before running build.py:
+```diff
+- python3 build.py build -t release --no-tests
++ CXXFLAGS="-Wno-error" python3 build.py build -t release --no-tests
+```
+
+这会覆盖 `-Werror`，允许警告但不导致构建失败。
+This overrides `-Werror`, allowing warnings without causing build failure.
+
 ## 验证 / Verification
 
 工作流将在以下情况自动运行：
