@@ -1,0 +1,30 @@
+# Build artifacts
+*.deb
+*.dsc
+*.changes
+*.buildinfo
+*.tar.gz
+*.tar.xz
+*.upload
+build/
+obj-*/
+
+# Debian packaging temp files
+debian/files
+debian/*.log
+debian/*.substvars
+debian/.debhelper/
+debian/tmp/
+debian/cangjie-compiler/
+debian/cangjie-compiler-headers/
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Git
+.git/
