@@ -13,6 +13,8 @@ jobs:
   build-packages:
     name: Build on Ubuntu ${{ matrix.ubuntu-version }}
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     strategy:
       fail-fast: false
       matrix:
