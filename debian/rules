@@ -16,7 +16,8 @@ override_dh_auto_configure:
 
 override_dh_auto_build:
 	# Use build.py to build the compiler
-	python3 build.py build -t release --no-tests -j $(shell nproc)
+	# Set CXXFLAGS to disable -Werror which causes build failures on upstream code
+	CXXFLAGS="-Wno-error" python3 build.py build -t release --no-tests -j $(shell nproc)
 
 override_dh_auto_install:
 	# Use build.py to install to debian/tmp
