@@ -4,9 +4,9 @@ Priority: optional
 Maintainer: Cangjie Team <cangjie@example.com>
 Build-Depends: debhelper-compat (= 13),
                cmake (>= 3.16),
-               clang (>= 14.0),
-               llvm-dev (>= 14.0),
-               libclang-dev (>= 14.0),
+               clang-14,
+               llvm-14-dev,
+               libclang-14-dev,
                ninja-build,
                python3,
                git
@@ -18,8 +18,8 @@ Vcs-Git: https://github.com/tozi-dev/cangjie-debian.git
 Package: cangjie-compiler
 Architecture: amd64 arm64
 Depends: ${shlibs:Depends}, ${misc:Depends},
-         llvm (>= 14.0),
-         libclang-cpp14
+         llvm-14,
+         libclang-cpp14t64
 Description: Cangjie programming language compiler
  Cangjie is a general-purpose programming language designed for
  full-scenario application development. It balances development

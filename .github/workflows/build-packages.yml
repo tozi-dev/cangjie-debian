@@ -60,13 +60,20 @@ jobs:
           # Build binary packages only (no source package, unsigned)
           dpkg-buildpackage -us -uc -b || true
           
+          # Move generated files to a dedicated output directory
+          cd ..
+          mkdir -p build-output
+          if ls *.deb *.buildinfo *.changes 2>/dev/null; then
+            mv *.deb *.buildinfo *.changes build-output/ || true
+          fi
+          
           # List generated files
           echo "Generated files:"
-          ls -lah ../*.deb ../*.buildinfo ../*.changes 2>/dev/null || echo "No .deb files found"
+          ls -lah build-output/ 2>/dev/null || echo "No .deb files found"
       
       - name: Check package contents
         run: |
-          cd cangjie_compiler/..
+          cd build-output
           for deb in *.deb; do
             if [ -f "$deb" ]; then
               echo "=== Contents of $deb ==="
@@ -78,7 +85,7 @@ jobs:
       
       - name: Lint packages
         run: |
-          cd cangjie_compiler/..
+          cd build-output
           for deb in *.deb; do
             if [ -f "$deb" ]; then
               echo "=== Linting $deb ==="
@@ -93,8 +100,5 @@ jobs:
         if: always()
         with:
           name: debian-packages-ubuntu-${{ matrix.ubuntu-version }}
-          path: |
-            cangjie_compiler/../*.deb
-            cangjie_compiler/../*.buildinfo
-            cangjie_compiler/../*.changes
+          path: build-output/
           if-no-files-found: warn
