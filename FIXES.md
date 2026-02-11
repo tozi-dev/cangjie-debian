@@ -2,8 +2,8 @@
 
 ## 问题描述 / Problem Description
 
-GitHub Actions 工作流构建失败，出现以下两个问题：
-The GitHub Actions workflow build failed with two issues:
+GitHub Actions 工作流构建失败，出现以下三个问题：
+The GitHub Actions workflow build failed with three issues:
 
 ### 1. 构建依赖不匹配 / Build Dependency Mismatch
 
@@ -67,6 +67,30 @@ fi
 + path: build-output/
 ```
 
+### 3. Debhelper 兼容级别冲突 / Debhelper Compat Level Conflict
+
+**错误信息 / Error Message:**
+```
+dh: warning: Please specify the debhelper compat level exactly once.
+dh: warning:  * debian/compat requests compat 13.
+dh: warning:  * debian/control requests compat 13 via "debhelper-compat (= 13)"
+dh: error: debhelper compat level specified both in debian/compat and via build-dependency on debhelper-compat
+```
+
+**原因 / Cause:**
+- Debhelper 兼容级别同时在两个地方指定：
+  - `debian/compat` 文件中指定为 13
+  - `debian/control` 中通过 `debhelper-compat (= 13)` 指定
+- 现代 Debian 打包只应使用一种方法
+
+**修复 / Fix:**
+删除 `debian/compat` 文件，仅保留 `debian/control` 中的 `debhelper-compat (= 13)` 声明：
+```bash
+rm debian/compat
+```
+
+这是 Debian 推荐的现代方法，因为它允许通过构建依赖明确声明兼容级别。
+
 ## 测试结果 / Test Results
 
 修复后的工作流将会：
@@ -80,6 +104,7 @@ After the fixes, the workflow will:
 
 - `.github/workflows/build-packages.yml` - 修复产物路径和构建流程
 - `debian/control` - 更新依赖包名称为具体版本
+- `debian/compat` - 删除（使用 debhelper-compat 替代）
 
 ## 提交记录 / Commit
 

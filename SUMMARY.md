@@ -22,7 +22,7 @@ Created complete Debian packaging in `debian/` directory:
 
 - ✅ `debian/copyright` - Apache-2.0 许可证信息
 
-- ✅ `debian/compat` - Debhelper 兼容级别 13
+- ✅ `debian/control` - Debhelper 兼容级别 13 (通过 debhelper-compat 指定)
 
 - ✅ `debian/source/format` - 源码格式 3.0 (quilt)
 

@@ -62,8 +62,9 @@ dput ppa:your-ppa-name ../cangjie-compiler_*.changes
 - `debian/rules`: Build rules (uses CMake)
 - `debian/changelog`: Package version history
 - `debian/copyright`: License information
-- `debian/compat`: Debhelper compatibility level
 - `debian/*.install`: File installation manifests
+
+Note: Debhelper compatibility level 13 is specified via `debhelper-compat (= 13)` in debian/control (modern approach).
 
 ## Notes
 
